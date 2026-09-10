@@ -46,7 +46,10 @@ import { getRootComposeRoutePath } from "@/lib/route-paths";
 import { getThreadDisplayTitle } from "@/lib/thread-title";
 import { getMutationErrorMessage } from "@/lib/mutation-errors";
 import { BbHttpError } from "@bb/sdk/browser";
-import { useSetRootComposeProjectId } from "@/lib/root-compose-selection";
+import {
+  resolveNewThreadProjectId,
+  useSetRootComposeProjectId,
+} from "@/lib/root-compose-selection";
 import { cn } from "@bb/shared-ui/lib/utils";
 import { Button } from "@bb/shared-ui/button";
 import {
@@ -1520,11 +1523,19 @@ function ProjectListComponent({
   const handleCreateProjectlessThread = useCallback(() => {
     openRootComposeForProject(PERSONAL_PROJECT_ID);
   }, [openRootComposeForProject]);
+  const defaultProjectId =
+    useSystemConfig().data?.generalSettings.defaultProjectId ?? null;
   const handleCreateThreadInSection = useCallback(
     (sectionId: string) => {
-      openRootComposeForProject(PERSONAL_PROJECT_ID, sectionId);
+      openRootComposeForProject(
+        resolveNewThreadProjectId({
+          routeProjectId: PERSONAL_PROJECT_ID,
+          defaultProjectId,
+        }) ?? PERSONAL_PROJECT_ID,
+        sectionId,
+      );
     },
-    [openRootComposeForProject],
+    [defaultProjectId, openRootComposeForProject],
   );
   const [isSectionCreateDialogOpen, setIsSectionCreateDialogOpen] =
     useState(false);
