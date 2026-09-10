@@ -1825,6 +1825,7 @@ describe("migrate", () => {
         showDiagnosticEvents: true,
         providerOrder: [],
         defaultProviderId: null,
+        defaultProjectId: null,
         streamerMode: false,
         managedBranchPrefix: "bb/",
       });

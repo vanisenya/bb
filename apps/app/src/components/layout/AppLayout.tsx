@@ -111,7 +111,11 @@ import { splitLayoutAtom } from "@/lib/split-layout/atoms";
 import { findPaneByThread } from "@/lib/split-layout";
 import { applyThreadOpenToLayout } from "@/views/thread-detail/splitThreadNavigation";
 import { useAppSettingsRouteMemory } from "@/hooks/useAppSettingsRouteMemory";
-import { useSetRootComposeProjectId } from "@/lib/root-compose-selection";
+import {
+  resolveNewThreadProjectId,
+  useSetRootComposeProjectId,
+} from "@/lib/root-compose-selection";
+import { useSystemConfig } from "@/hooks/queries/system-queries";
 import { BackToAppCommandHandler } from "./BackToAppCommandHandler";
 
 const SIDEBAR_WIDTH_KEY = "bb.sidebar.width";
@@ -423,6 +427,8 @@ export function AppLayout({ children }: AppLayoutProps) {
     toolsRoutePath,
   } = useAppSettingsRouteMemory();
   const setRootComposeProjectId = useSetRootComposeProjectId();
+  const defaultProjectId =
+    useSystemConfig().data?.generalSettings?.defaultProjectId ?? null;
   useEffect(
     () =>
       wsManager.onThreadOpen((signal) => {
@@ -448,8 +454,12 @@ export function AppLayout({ children }: AppLayoutProps) {
     [isCompactViewport, navigate, store],
   );
   useAppCommandHandler("thread.new", () => {
-    if (projectId !== undefined) {
-      setRootComposeProjectId(projectId);
+    const newThreadProjectId = resolveNewThreadProjectId({
+      routeProjectId: projectId,
+      defaultProjectId,
+    });
+    if (newThreadProjectId !== undefined) {
+      setRootComposeProjectId(newThreadProjectId);
     }
     void navigate(getRootComposeRoutePath(), {
       state: { focusPrompt: true },

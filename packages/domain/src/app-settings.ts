@@ -19,6 +19,7 @@ export const appSettingsSchema = z
     showDiagnosticEvents: z.boolean(),
     providerOrder: z.array(z.string().min(1)),
     defaultProviderId: z.string().min(1).nullable(),
+    defaultProjectId: z.string().min(1).nullable(),
     streamerMode: z.boolean(),
     managedBranchPrefix: managedBranchPrefixSchema,
   })
@@ -31,6 +32,7 @@ export const defaultAppSettings: AppSettings = {
   showDiagnosticEvents: false,
   providerOrder: [],
   defaultProviderId: null,
+  defaultProjectId: null,
   streamerMode: false,
   managedBranchPrefix: DEFAULT_MANAGED_BRANCH_PREFIX,
 };

@@ -29,9 +29,14 @@ vi.mock("@/components/sidebar/AppSidebar", () => ({
   AppSidebar: () => <aside data-testid="app-sidebar" />,
 }));
 
+const generalSettings = vi.hoisted(() => ({
+  defaultProjectId: null as string | null,
+}));
+
 vi.mock("@/hooks/queries/system-queries", () => ({
   useSystemConfig: () => ({
     data: {
+      generalSettings,
       experiments: {
         changelogPreview: false,
         editMessages: false,
@@ -162,6 +167,7 @@ describe("AppLayout root compose project preference", () => {
   beforeEach(() => {
     window.localStorage.clear();
     commandHandlers.clear();
+    generalSettings.defaultProjectId = null;
     mockUseThread.mockReturnValue({
       data: {
         id: "thr_opened",
@@ -237,5 +243,59 @@ describe("AppLayout root compose project preference", () => {
     expect(
       window.localStorage.getItem(ROOT_COMPOSE_PROJECT_ID_STORAGE_KEY),
     ).toBe("proj_last_run");
+  });
+
+  it("starts in the default project when the route has no project", async () => {
+    generalSettings.defaultProjectId = "proj_default";
+    window.localStorage.setItem(
+      ROOT_COMPOSE_PROJECT_ID_STORAGE_KEY,
+      "proj_last_run",
+    );
+
+    render(
+      <MemoryRouter initialEntries={["/"]}>
+        <AppLayout>
+          <div>New thread route</div>
+        </AppLayout>
+      </MemoryRouter>,
+    );
+
+    act(() => {
+      expect(commandHandlers.get("thread.new")?.()).toBe(true);
+    });
+
+    await waitFor(() => {
+      expect(
+        window.localStorage.getItem(ROOT_COMPOSE_PROJECT_ID_STORAGE_KEY),
+      ).toBe("proj_default");
+    });
+  });
+
+  it("keeps the opened thread project over the default project", async () => {
+    generalSettings.defaultProjectId = "proj_default";
+
+    render(
+      <MemoryRouter
+        initialEntries={["/projects/proj_opened/threads/thr_opened"]}
+      >
+        <AppLayout>
+          <div>Thread route</div>
+        </AppLayout>
+      </MemoryRouter>,
+    );
+
+    await waitFor(() => {
+      expect(document.title).toBe("Opened Thread");
+    });
+
+    act(() => {
+      expect(commandHandlers.get("thread.new")?.()).toBe(true);
+    });
+
+    await waitFor(() => {
+      expect(
+        window.localStorage.getItem(ROOT_COMPOSE_PROJECT_ID_STORAGE_KEY),
+      ).toBe("proj_opened");
+    });
   });
 });

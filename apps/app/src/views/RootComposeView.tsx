@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import {
   findCachedProviderInfo,
+  useSystemConfig,
   useSystemProviders,
 } from "@/hooks/queries/system-queries";
 import {
@@ -500,8 +501,11 @@ export function LegacyProjectComposeRedirect({
 }
 
 export function RootComposeView() {
+  const systemConfigQuery = useSystemConfig();
   const [rootComposeProjectId, setRootComposeProjectId] =
-    useRootComposeProjectId();
+    useRootComposeProjectId(
+      systemConfigQuery.data?.generalSettings.defaultProjectId ?? null,
+    );
   const location = useLocation();
   const navigate = useNavigate();
   const queryClient = useQueryClient();

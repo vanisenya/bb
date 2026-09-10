@@ -17,7 +17,11 @@ function renderSection(overrides?: {
 }) {
   return render(
     <GeneralSettingsSection
+      defaultProjectDisabled={false}
+      defaultProjectId={null}
+      defaultProjectOptions={[]}
       desktopBrowserAvailable={false}
+      onDefaultProjectIdChange={vi.fn()}
       managedBranchPrefix={overrides?.managedBranchPrefix ?? "bb/"}
       managedBranchPrefixDisabled={false}
       navigateToThreadAfterCreate={false}

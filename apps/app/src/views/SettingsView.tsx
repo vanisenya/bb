@@ -73,6 +73,7 @@ import {
   useUpdateExperiments,
 } from "@/hooks/mutations/settings-mutations";
 import { useSystemConfig } from "@/hooks/queries/system-queries";
+import { useSidebarNavigation } from "@/hooks/queries/sidebar-navigation-query";
 import { useWorkspaceOpenTargets } from "@/hooks/useWorkspaceOpenTargets";
 import { isDesktopBrowserAvailable } from "@/lib/bb-desktop";
 import {
@@ -158,8 +159,17 @@ interface AppearanceSettingsSectionProps {
   themePreference: ThemePreference;
 }
 
+interface DefaultProjectOption {
+  id: string;
+  name: string;
+}
+
 interface GeneralSettingsSectionProps {
+  defaultProjectDisabled: boolean;
+  defaultProjectId: string | null;
+  defaultProjectOptions: readonly DefaultProjectOption[];
   desktopBrowserAvailable: boolean;
+  onDefaultProjectIdChange: (projectId: string | null) => void;
   managedBranchPrefix: string;
   managedBranchPrefixDisabled: boolean;
   navigateToThreadAfterCreate: boolean;
@@ -599,6 +609,8 @@ const FOLLOW_UP_BEHAVIOR_OPTIONS = [
   },
 ] as const;
 const STREAMER_MODE_SETTING_LABEL = "Streamer mode";
+const DEFAULT_PROJECT_SETTING_LABEL = "Default project for new threads";
+const PERSONAL_DEFAULT_PROJECT_LABEL = "Personal (no project)";
 const MANAGED_BRANCH_PREFIX_SETTING_LABEL = "New branch prefix";
 const MANAGED_BRANCH_PREFIX_EXAMPLE_SLUG = "fix-login-flow-thr_ab12cd34ef";
 
@@ -837,7 +849,11 @@ export function AppearanceSettingsSection({
 }
 
 export function GeneralSettingsSection({
+  defaultProjectDisabled,
+  defaultProjectId,
+  defaultProjectOptions,
   desktopBrowserAvailable,
+  onDefaultProjectIdChange,
   managedBranchPrefix,
   managedBranchPrefixDisabled,
   navigateToThreadAfterCreate,
@@ -856,9 +872,65 @@ export function GeneralSettingsSection({
   streamerMode,
   streamerModeDisabled,
 }: GeneralSettingsSectionProps) {
+  const defaultProjectLabel =
+    defaultProjectId === null
+      ? PERSONAL_DEFAULT_PROJECT_LABEL
+      : (defaultProjectOptions.find((option) => option.id === defaultProjectId)
+          ?.name ?? defaultProjectId);
+  const defaultProjectMenuOptions: ReadonlyArray<{
+    id: string | null;
+    name: string;
+  }> = [
+    { id: null, name: PERSONAL_DEFAULT_PROJECT_LABEL },
+    ...defaultProjectOptions,
+  ];
   return (
     <SettingsSection title="General">
       <div className="space-y-5">
+        <SettingsWithControl
+          label={DEFAULT_PROJECT_SETTING_LABEL}
+          description="The project the composer starts in for a new thread. You can still change it before sending."
+        >
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="outline"
+                size="sm"
+                className={cn(SETTINGS_DROPDOWN_TRIGGER_CLASS, "sm:w-48")}
+                disabled={defaultProjectDisabled}
+                aria-label={DEFAULT_PROJECT_SETTING_LABEL}
+              >
+                <span className="truncate">{defaultProjectLabel}</span>
+                <Icon
+                  name="ChevronDown"
+                  className="size-3.5 shrink-0 text-muted-foreground"
+                />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+              align="end"
+              className={cn(SETTINGS_DROPDOWN_CONTENT_CLASS, "max-w-72")}
+            >
+              {defaultProjectMenuOptions.map((option) => (
+                <DropdownMenuItem
+                  key={option.id ?? "personal"}
+                  onSelect={() => onDefaultProjectIdChange(option.id)}
+                >
+                  <span className="min-w-0 truncate">{option.name}</span>
+                  <Icon
+                    name="Check"
+                    className={cn(
+                      "ml-auto",
+                      defaultProjectId !== option.id && "opacity-0",
+                      COARSE_POINTER_ICON_SIZE_CLASS,
+                    )}
+                  />
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </SettingsWithControl>
+
         <SettingsWithControl
           label={NAVIGATE_TO_THREAD_AFTER_CREATE_SETTING_LABEL}
         >
@@ -1119,6 +1191,9 @@ export function SettingsView() {
   const location = useLocation();
   const { activePluginId, activeSection, hasUnknownSection } =
     useSettingsNavState();
+  const sidebarNavigationQuery = useSidebarNavigation({
+    enabled: activeSection === "general",
+  });
   if (hasUnknownSection) {
     return <Navigate to={SETTINGS_ROUTE_PATH} replace />;
   }
@@ -1283,6 +1358,23 @@ export function SettingsView() {
     content = (
       <>
         <GeneralSettingsSection
+          defaultProjectDisabled={
+            systemConfigQuery.data === undefined ||
+            updateGeneralSettingsMutation.isPending
+          }
+          defaultProjectId={generalSettings.defaultProjectId}
+          defaultProjectOptions={
+            sidebarNavigationQuery.data?.projects.map(({ id, name }) => ({
+              id,
+              name,
+            })) ?? []
+          }
+          onDefaultProjectIdChange={(projectId) =>
+            updateGeneralSettingsMutation.mutate({
+              ...generalSettings,
+              defaultProjectId: projectId,
+            })
+          }
           desktopBrowserAvailable={desktopBrowserAvailable}
           managedBranchPrefix={generalSettings.managedBranchPrefix}
           managedBranchPrefixDisabled={

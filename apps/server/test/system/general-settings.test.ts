@@ -30,6 +30,7 @@ describe("general settings", () => {
           steerActiveThreadOnEnter: true,
           providerOrder: ["pi", "codex"],
           defaultProviderId: "pi",
+          defaultProjectId: "proj_repo",
         }),
       });
       expect(put.status).toBe(200);
@@ -46,6 +47,7 @@ describe("general settings", () => {
         steerActiveThreadOnEnter: true,
         providerOrder: ["pi", "codex"],
         defaultProviderId: "pi",
+        defaultProjectId: "proj_repo",
         showUnhandledProviderEvents: false,
       });
       expect(getAppSettings(harness.db)).toEqual({
@@ -54,6 +56,7 @@ describe("general settings", () => {
         steerActiveThreadOnEnter: true,
         providerOrder: ["pi", "codex"],
         defaultProviderId: "pi",
+        defaultProjectId: "proj_repo",
       });
 
       const config = await harness.app.request("/api/v1/system/config");
@@ -67,6 +70,7 @@ describe("general settings", () => {
         steerActiveThreadOnEnter: true,
         providerOrder: ["pi", "codex"],
         defaultProviderId: "pi",
+        defaultProjectId: "proj_repo",
       });
     });
   });

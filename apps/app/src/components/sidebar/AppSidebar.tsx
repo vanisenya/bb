@@ -53,6 +53,11 @@ import {
   useIndexedAppCommandHandlers,
 } from "@/components/commands/AppCommandProvider";
 import { useRouteState } from "@/hooks/useRouteState";
+import { useSystemConfig } from "@/hooks/queries/system-queries";
+import {
+  resolveNewThreadProjectId,
+  useSetRootComposeProjectId,
+} from "@/lib/root-compose-selection";
 import { SidebarNavigationRegion } from "./SidebarNavigationRegion";
 
 const NEW_THREAD_PANE_CONTENT = { kind: "new-thread" } as const;
@@ -84,6 +89,9 @@ export function AppSidebar({
   const threadListReplacement = useThreadListReplacement();
   const { threadId: activeThreadId } = useRouteState();
   const navigate = useNavigate();
+  const setRootComposeProjectId = useSetRootComposeProjectId();
+  const defaultProjectId =
+    useSystemConfig().data?.generalSettings.defaultProjectId ?? null;
   const newThreadSplit = usePaneContentSplitDrag({
     content: NEW_THREAD_PANE_CONTENT,
     enabled: true,
@@ -110,10 +118,17 @@ export function AppSidebar({
 
   const handleNewChat = useCallback(() => {
     closeOnMobile();
+    const newThreadProjectId = resolveNewThreadProjectId({
+      routeProjectId: undefined,
+      defaultProjectId,
+    });
+    if (newThreadProjectId !== undefined) {
+      setRootComposeProjectId(newThreadProjectId);
+    }
     void navigate(getRootComposeRoutePath(), {
       state: { focusPrompt: true },
     });
-  }, [closeOnMobile, navigate]);
+  }, [closeOnMobile, defaultProjectId, navigate, setRootComposeProjectId]);
 
   const showThreadShortcuts = useCallback(() => {
     const targets = getSidebarThreadShortcutTargets(sidebarRef.current);

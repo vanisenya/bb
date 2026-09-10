@@ -204,6 +204,7 @@ function useSettingsStoryState() {
   const [steerActiveThreadOnEnter, setSteerActiveThreadOnEnter] =
     useState(false);
   const [streamerMode, setStreamerMode] = useState(false);
+  const [defaultProjectId, setDefaultProjectId] = useState<string | null>(null);
   const [managedBranchPrefix, setManagedBranchPrefix] = useState(
     defaultAppSettings.managedBranchPrefix,
   );
@@ -219,6 +220,7 @@ function useSettingsStoryState() {
 
   return {
     appearance,
+    defaultProjectId,
     directoryTargetId,
     experiments,
     fileTargetId,
@@ -232,6 +234,7 @@ function useSettingsStoryState() {
     streamerMode,
     showDiagnosticEvents,
     setAppearance,
+    setDefaultProjectId,
     setDirectoryTargetId,
     setExperiments,
     setFileTargetId,
@@ -275,6 +278,13 @@ function GeneralSettingsStory({
   return (
     <>
       <GeneralSettingsSection
+        defaultProjectDisabled={false}
+        defaultProjectId={state.defaultProjectId}
+        defaultProjectOptions={[
+          { id: "proj_web", name: "bb-web" },
+          { id: "proj_docs", name: "Documentation site" },
+        ]}
+        onDefaultProjectIdChange={state.setDefaultProjectId}
         desktopBrowserAvailable={desktopBrowserAvailable}
         managedBranchPrefix={state.managedBranchPrefix}
         managedBranchPrefixDisabled={false}

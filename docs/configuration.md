@@ -250,6 +250,16 @@ the prefix is at most 64 characters. The prefix applies to branches bb creates
 after you change it; it does not rename an existing branch or worktree. Set it
 with `bb settings general managedBranchPrefix <prefix>`.
 
+The "Default project for new threads" select in Settings → General chooses the
+project the app composer starts in when you open a new thread from the sidebar
+New thread button or the New thread command outside a project. It defaults to
+"Personal (no project)" (`null`). The New thread command inside a project still
+uses that project, and you can switch projects in the composer before sending.
+A client with no remembered composer project also starts in the default
+project. A value naming a missing or deleted project falls back to the personal
+project. Set it with `bb settings general defaultProjectId <project-id>` or
+clear it with `bb settings general defaultProjectId null`.
+
 Settings → Providers lists every registered agent provider in picker order.
 Move a provider up or down to change the order and choose the default for new
 threads. Both are persisted preferences: `providerOrder` is the list of ids

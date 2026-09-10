@@ -34,6 +34,36 @@ describe("bb settings commands", () => {
     });
   });
 
+  it("sets and clears the default project for new threads", async () => {
+    const put = vi.fn(async ({ json }) => json);
+    stubServerApi({
+      "v1.system.config.$get": vi.fn(async () => ({
+        generalSettings: {
+          ...defaultAppSettings,
+          defaultProjectId: "proj_old",
+        },
+        experiments: defaultExperiments,
+      })),
+      "v1.settings.general.$put": put,
+    });
+
+    await runCommand(
+      ["settings", "general", "defaultProjectId", "proj_abc123"],
+      register,
+    );
+    expect(put).toHaveBeenLastCalledWith({
+      json: { ...defaultAppSettings, defaultProjectId: "proj_abc123" },
+    });
+
+    await runCommand(
+      ["settings", "general", "defaultProjectId", "null"],
+      register,
+    );
+    expect(put).toHaveBeenLastCalledWith({
+      json: { ...defaultAppSettings, defaultProjectId: null },
+    });
+  });
+
   it("rejects an unknown general setting key", async () => {
     stubServerApi({
       "v1.system.config.$get": vi.fn(async () => ({

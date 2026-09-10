@@ -100,6 +100,20 @@ every window and client sees the same value.
 - `defaultProviderId` defaults to `null`. Set a provider ID or use `null` to
   clear it.
 
+## Default project for new threads
+
+- `defaultProjectId` defaults to `null`, which starts generic new threads in
+  the personal project. Set it with
+  `bb settings general defaultProjectId <project-id>` (see `bb project list`)
+  or clear it with `bb settings general defaultProjectId null`.
+- When set, the app's sidebar New thread button and the New thread command
+  outside a project start the composer in that project. The New thread command
+  inside a project keeps that project, and a client with no remembered composer
+  project also starts there. The project can still be changed in the composer.
+- A value that names a missing or deleted project falls back to the personal
+  project. The setting only seeds the app composer; `bb thread create` and the
+  SDK keep their explicit project arguments.
+
 ## Message edits
 
 - The `editMessages` experiment defaults to true. It controls edits of

@@ -113,6 +113,13 @@ the default gives `bb/fix-login-flow-thr_ab12cd34ef`. Set `sawyer/wt-` to get
 a prefix that cannot start a valid git branch name. The new prefix applies to
 branches bb creates after the change.
 
+Settings → General includes `defaultProjectId`, which defaults to null (the
+personal project). Set it to a project id to start new threads from the
+sidebar New thread button, or the New thread command outside a project, in
+that project. The project can still be changed in the composer, and a missing
+project falls back to personal. Clear it with
+`bb settings general defaultProjectId null`.
+
   bb settings show
   bb settings ai-services
   bb settings general <key> <value>
